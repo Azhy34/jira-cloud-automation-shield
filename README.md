@@ -98,6 +98,18 @@ python mcp_server/jira_mcp.py
 2. `create_jira_issue(summary, description, project_key, issue_type, parent_key)` — Create work items with rich text ADF descriptions.
 3. `move_jira_issue_status(issue_key, target_status)` — Transition issues across Kanban columns (*To Do*, *In Progress*, *Done*).
 
+### 🧩 Extensibility Architecture: "What If an Operation is Missing?"
+
+A critical architectural consideration for enterprise AI engineering: *Why expose 3 atomic tools instead of wrapping all 500+ Atlassian REST endpoints?*  
+This design intentionally follows the **Principle of Least Privilege (PoLP)** and modular extensibility:
+
+| Enterprise Scenario | Architectural Mechanism | How It Works in Production |
+|---|---|---|
+| **1. Complex or Niche Queries** | **Universal JQL Expressiveness** | Instead of polluting LLM context with dozens of rigid tools (`find_by_assignee`, `find_overdue`), the single `search_jira_issues` tool accepts full Jira Query Language. The LLM dynamically constructs compound filters (e.g., `issuetype = Bug AND created >= -7d AND assignee is EMPTY`). |
+| **2. New Domain Workflows** | **60-Second FastMCP Extension Pattern** | Adding any new API operation (e.g., `assign_issue`, `add_attachment`) requires only 5 lines of Python with `@mcp.tool()`, inheriting automatic Pydantic validation and `JiraTracer` logging. |
+| **3. Destructive / Admin Operations** | **Least Privilege & Human Escalation** | High-blast-radius operations (`delete_project`, `modify_billing`) are intentionally excluded from the agent toolset. When requested, the agent gracefully escalates to a human with direct Atlassian deep-links rather than hallucinating or executing destructive mutations. |
+
+
 ---
 
 ## 🚀 Quickstart & Interactive IDE Controller
