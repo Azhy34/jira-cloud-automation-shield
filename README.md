@@ -81,9 +81,7 @@ The integration was structured into a master Epic and atomic child phases direct
   ├── [KAN-6]  [INT-105] Step 5: Machine-Readable Audit Report & Contract Handoff    [DONE]
   ├── [KAN-12] [INT-106] Step 6: Two-Layer Pydantic Error Shield & FastMCP Gateway   [DONE]
   ├── [KAN-9]  [INT-107] Step 7: Structured Runtime Observability & In-Issue Tracing [DONE]
-  ├── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline [DONE]
-  ├── [KAN-7]  [AI-101]  Step 9: Slack Bot Gateway & Ingestion Service              [DONE]
-  └── [KAN-8]  [AI-102]  Step 10: Data Connectors & Enterprise RAG Pipeline          [DONE]
+  └── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline [DONE]
 ```
 
 > 💡 **Step 0 Prerequisite (`KAN-10`):** Completed official Atlassian Learning Path [Get the Most Out of Jira](https://community.atlassian.com/learning/path/get-the-most-out-of-jira) prior to building custom automation, ensuring deep domain understanding of Jira issue types, Kanban workflows, timeline views, and JQL syntax before diving into REST API development.
