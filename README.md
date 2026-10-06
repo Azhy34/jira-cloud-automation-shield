@@ -114,10 +114,10 @@ This repository bundles ready-to-run Agent Skills (`SKILL.md`) following the off
 * 🛡️ **[`skills/jira-triage-guard/SKILL.md`](skills/jira-triage-guard/SKILL.md)**: Production triage workflow enforcing *Extract ➔ Search ➔ Analyze ➔ Act*. Intercepts issue creation, searches recent open/resolved tickets, and prevents duplicate backlog pollution.
 * 📋 **[`skills/jira-spec-to-backlog/SKILL.md`](skills/jira-spec-to-backlog/SKILL.md)**: Automatically transforms unstructured PRDs and specifications into structured Epics, atomic child tasks with Acceptance Criteria checklists, and dependency issueLinks.
 
-### 🧩 Extensibility Architecture: "What If an Operation is Missing?"
+### 🧩 Extensibility Architecture: "Why Expose Atomic Tools Instead of 500+ Endpoints?"
 
-A critical architectural consideration for enterprise AI engineering: *Why expose 3 atomic tools instead of wrapping all 500+ Atlassian REST endpoints?*  
-This design intentionally follows the **Principle of Least Privilege (PoLP)** and modular extensibility:
+A critical architectural consideration for enterprise AI engineering: *Why expose focused atomic tools instead of blindly wrapping all 500+ Atlassian REST endpoints?*  
+This design intentionally follows the **Principle of Least Privilege (PoLP)**, modular extensibility, and the **4-Tier Operational Risk Hierarchy**:
 
 | Enterprise Scenario | Architectural Mechanism | How It Works in Production |
 |---|---|---|
@@ -125,6 +125,35 @@ This design intentionally follows the **Principle of Least Privilege (PoLP)** an
 | **2. New Domain Workflows** | **60-Second FastMCP Extension Pattern** | Adding any new API operation (e.g., `assign_issue`, `add_attachment`) requires only 5 lines of Python with `@mcp.tool()`, inheriting automatic Pydantic validation and `JiraTracer` logging. |
 | **3. Destructive / Admin Operations** | **Least Privilege & Human Escalation** | High-blast-radius operations (`delete_project`, `modify_billing`) are intentionally excluded from the agent toolset. When requested, the agent gracefully escalates to a human with direct Atlassian deep-links rather than hallucinating or executing destructive mutations. |
 
+---
+
+## 🏛️ Enterprise 4-Tier Operational Risk & Endpoint Taxonomy
+
+Official Atlassian documentation describes 500+ endpoints purely from a technical syntax standpoint, but **remains silent on business risk, agent blast radius, and compliance boundaries**. 
+
+To prevent autonomous AI agents from polluting backlogs, wiping compliance logs, or compromising tenant governance, this architecture categorizes Jira Cloud endpoints into **4 Operational Risk Tiers** (full technical specification in [**`docs/ENTERPRISE_API_TIER_TAXONOMY.md`**](docs/ENTERPRISE_API_TIER_TAXONOMY.md)):
+
+```text
+                                  ▲
+                                 / \
+                                / T4 \      TIER 4: Hard Blacklist (Admin & Security)
+                               /------\     Blast Radius: Catastrophic | Access: FORBIDDEN
+                              /  T3    \    TIER 3: Human-in-the-Loop (Destructive & Bulk)
+                             /----------\   Blast Radius: High | Access: Approval Required
+                            /    T2      \  TIER 2: Guarded Mutations (Single Items & Triage)
+                           /--------------\ Blast Radius: Bounded | Access: Pre-Flight Shields
+                          /      T1        \TIER 1: Read & Discovery (Queries & Metadata)
+                         /──────────────────\Blast Radius: Zero | Access: Fully Autonomous
+```
+
+| Operational Tier | Representative Endpoints | Blast Radius | Agent Autonomy & Governance |
+|---|---|---|---|
+| **🟢 Tier 1: Read & Discovery** | `GET /myself`, `GET /project`, `POST /search/jql`, `GET /createmeta`, `GET /transitions`, `GET /field` | **Zero** (Idempotent query) | **100% Autonomous (`Mode.AUTO` / `Mode.ANY`)**. Enforces projection masks (`fields: ...`) and client-side metadata caching. |
+| **🟡 Tier 2: Guarded Safe Mutations** | `POST /issue`, `POST /issue/{id}/comment`, `POST /issue/{id}/transitions`, `POST /issueLink` | **Bounded** (Single issue, reversible) | **Autonomous with Pre-Flight Shields**. Mandatory JQL duplicate check (`jira-triage-guard`), required custom fields introspection, and in-issue audit trace comments. |
+| **🟠 Tier 3: High-Impact / Destructive** | `DELETE /issue/{id}`, `PUT /issue/{id}` (bulk), `DELETE /attachment`, `POST /version`, `POST /sprint` | **High** (Team velocity & historical logs) | **Prohibited for Autonomous Execution**. Staging proposal pattern (Dry-Run); requires explicit **Human-in-the-Loop (HITL)** approval. |
+| **🔴 Tier 4: Tenant Admin & Governance** | `DELETE /project/{key}`, `POST /user`, `PUT /workflow`, `PUT /permissionscheme`, `POST /webhook` | **Catastrophic** (Organization-wide) | **HARD BLACKLIST (Never Exposed as MCP Tools)**. Deterministic refusal with direct escalation link to Atlassian Admin Console. |
+
+👉 *For deep-dive schema contracts, blast radius analysis, and compliance mapping (SOC 2, ISO 27001, GDPR), read the complete [Enterprise API Tier Taxonomy Specification](docs/ENTERPRISE_API_TIER_TAXONOMY.md).*
 
 ---
 
