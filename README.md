@@ -73,15 +73,18 @@ The integration was structured into a master Epic and atomic child phases direct
 ```text
 [ MASTER EPIC: KAN-1 ]
 "[INT-CORE] Jira Cloud REST API v3 Integration & Automated Contract Discovery"
-  ├── [KAN-2] [INT-101] Security & Identity Setup (Zero-Leak Credentials Vault)  [DONE]
-  ├── [KAN-3] [INT-102] Postman MCP Workspace & Environment Orchestration       [DONE]
-  ├── [KAN-4] [INT-103] API Probing & Breaking Changes Detection (/search/jql)    [DONE]
-  ├── [KAN-9] [INT-106] Structured Runtime Observability & In-Issue Audit Tracing [DONE]
-  ├── [KAN-5] [INT-104] Mutation Testing: End-to-End Issue Lifecycle Creation    [TO DO]
-  ├── [KAN-6] [INT-105] Machine-Readable Audit Report & Handoff                 [TO DO]
-  ├── [KAN-7] [AI-101]  Slack Bot Gateway & Ingestion Service                   [TO DO]
-  └── [KAN-8] [AI-102]  Data Connectors & Enterprise RAG Pipeline               [TO DO]
+  ├── [KAN-10] [INT-100] Step 0: Atlassian Jira Fundamentals Certification       [DONE]
+  ├── [KAN-2]  [INT-101] Security & Identity Setup (Zero-Leak Credentials Vault)  [DONE]
+  ├── [KAN-3]  [INT-102] Postman MCP Workspace & Environment Orchestration       [DONE]
+  ├── [KAN-4]  [INT-103] API Probing & Breaking Changes Detection (/search/jql)    [DONE]
+  ├── [KAN-9]  [INT-106] Structured Runtime Observability & In-Issue Audit Tracing [DONE]
+  ├── [KAN-5]  [INT-104] Mutation Testing: End-to-End Issue Lifecycle Creation    [TO DO]
+  ├── [KAN-6]  [INT-105] Machine-Readable Audit Report & Handoff                 [TO DO]
+  ├── [KAN-7]  [AI-101]  Slack Bot Gateway & Ingestion Service                   [TO DO]
+  └── [KAN-8]  [AI-102]  Data Connectors & Enterprise RAG Pipeline               [TO DO]
 ```
+
+> 💡 **Step 0 Prerequisite (`KAN-10`):** Completed official Atlassian Learning Path [Get the Most Out of Jira](https://community.atlassian.com/learning/path/get-the-most-out-of-jira) prior to building custom automation, ensuring deep domain understanding of Jira issue types, Kanban workflows, timeline views, and JQL syntax before diving into REST API development.
 
 ---
 
@@ -129,7 +132,7 @@ cp .env.example .env
 
 ### 3. Run Automated Tests
 ```bash
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ### 4. Inspect Live Board from Terminal
