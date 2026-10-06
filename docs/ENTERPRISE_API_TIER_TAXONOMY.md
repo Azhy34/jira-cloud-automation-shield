@@ -59,22 +59,22 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
 │   └── 🔴 TIER 4: Tenant Admin       ──▶ HARD REJECT: Deterministic Refusal Link  │
 │                                                                                  │
 │   [ LAYER 1: Inbound Parsed Arguments Guard (Pydantic v2) ]                      │
-│   • Pre-network schema validation (summary length, project key regex, ADF format)│
+│   • Pre-network validation: key regex, single-line summary, size limits          │
 │   • Immediate self-correction hint returned on schema failure without net call   │
 │                                                                                  │
-│   [ STEP 9 HARDENING GUARDS ]                                                    │
-│   • check_duplicate_issues: Pre-creation JQL similarity query (last 90 days)     │
-│   • get_createmeta_fields: Introspects required custom fields before POST         │
+│   [ STEP 9 + 11 HARDENING GUARDS ]                                               │
+│   • create_jira_issue runs duplicate triage itself (fail-closed, 90 days)        │
+│   • On HTTP 400: required fields via current createmeta (cached 10 min)          │
 │                                                                                  │
 │   [ ZERO-DEPENDENCY TRACER & AUDIT ENGINE ]                                      │
 │   • Emits correlation `trace_id` (trc-xxxx) to append-only JSON log              │
-│   • Attaches two-way audit trail comment to Jira Cloud work items                │
+│   • Audit comment on transitions; a failed comment is reported                   │
 │                                                                                  │
 │   [ LAYER 2: Outbound Response Shield & Compression ]                            │
-│   • Filters 35KB raw Atlassian response down to <1KB normalized Pydantic model   │
-│   • Protects agent from HTTP 4xx/5xx network crashes via ServiceResult fallback   │
+│   • Field projection: 11-25 KB -> ~2.4 KB per issue (measured)                   │
+│   • Tools never raise: every outcome is a ServiceResult (ok, error, hint)        │
 └────────────────────────────────────────┬─────────────────────────────────────────┘
-                                         │ 2. Scoured, Validated TLS 1.3 Requests
+                                         │ 2. HTTPS only; GET retried on 429/5xx (Retry-After)
                                          ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │              Atlassian Jira Cloud REST API v3 (500+ Raw Endpoints)               │
@@ -95,14 +95,14 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
   * `GET /rest/api/3/project` & `GET /rest/api/3/project/{key}` — Project catalog discovery.
   * `GET /rest/api/3/search/jql` & `POST /rest/api/3/search/jql` — Targeted JQL querying.
   * `GET /rest/api/3/issue/{issueIdOrKey}` — Individual issue payload retrieval.
-  * `GET /rest/api/3/issue/createmeta` — Custom field & issue type schema discovery.
+  * `GET /rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes` and `…/issuetypes/{issueTypeId}` — Custom field & issue type schema discovery (the legacy `GET /issue/createmeta` is deprecated).
   * `GET /rest/api/3/issue/{issueIdOrKey}/transitions` — Workflow state discovery.
   * `GET /rest/api/3/field`, `GET /rest/api/3/priority`, `GET /rest/api/3/issuetype` — Enterprise taxonomies.
 * **Agent Governance & Architectural Controls:**
   * **Tool Choice Mode:** `FunctionCallingConfig.Mode.AUTO` or `Mode.ANY`.
-  * **Field Projection Masks:** Enforce explicit projection (`fields: ["summary", "status", "priority", "assignee"]`) to compress payloads from 35KB down to <1KB, preserving LLM token efficiency.
-  * **Client-Side Caching:** Cache static metadata (`createmeta`, `field`, `priority`) with a 15-minute TTL.
-  * **Pagination Bounds:** Hardcap `maxResults <= 50` and enforce `validateQuery=strict` to prevent expensive unbounded scans.
+  * **Field Projection Masks:** Explicit projection (`fields: summary,status,issuetype,parent,description,resolution`) cuts a search payload from 11–25 KB to ~2.4 KB per issue (78–91% smaller, measured), preserving LLM token efficiency.
+  * **Client-Side Caching:** `createmeta` is cached for 10 minutes. Caching `field` and `priority` is a planned extension.
+  * **Pagination Bounds:** `max_results` is capped at 50 by the Layer 1 guard; the client follows `nextPageToken` up to that bound.
 
 ---
 
@@ -117,10 +117,10 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
   * `POST /rest/api/3/issueLink` — Semantic dependency mapping (*Blocks*, *Relates*, *Duplicate*).
   * `PUT /rest/api/3/issue/{issueIdOrKey}/assignee` — Individual ownership assignment.
 * **Agent Governance & Architectural Controls:**
-  * **Pre-Flight Duplicate Triage:** Agent **must execute** `find_similar_issues` (via `jira-triage-guard`) prior to calling `POST /issue`.
-  * **Schema Introspection Shield:** Introspect `createmeta` before creation to ensure required enterprise custom fields are satisfied, avoiding HTTP 400 rejection.
-  * **In-Issue Audit Tracing:** Every state mutation injects an in-issue audit comment with a unique `trace_id` (e.g., `trc-c68108e2`).
-  * **Idempotency Guarantees:** Client tracks retry loops to avoid creating duplicate issues upon network timeouts.
+  * **Pre-Flight Duplicate Triage:** `create_jira_issue` runs `find_similar_issues` itself before `POST /issue` — enforced in code, not left to the prompt. A likely duplicate blocks creation, and so does an unavailable triage (fail-closed).
+  * **Schema Introspection Shield:** When `POST /issue` returns HTTP 400, the client loads the required fields from `createmeta` and returns them as a fix-it hint.
+  * **In-Issue Audit Tracing:** Status transitions add an in-issue audit comment with the `trace_id` (e.g., `trc-c68108e2`); a comment that fails to save is reported, not hidden.
+  * **No Duplicate on Retry:** Only GET requests are retried; `POST /issue` is never retried, so a network timeout cannot create a second issue.
 
 ---
 
@@ -137,8 +137,8 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
   * `POST /rest/api/3/board/{boardId}/sprint` & `PUT /rest/api/3/sprint/{id}` — Starting or closing sprint cycles.
 * **Agent Governance & Architectural Controls:**
   * **Autonomous Execution Strictly Prohibited:** Agents are **never** permitted to execute Tier 3 endpoints autonomously.
-  * **Staging / Proposal Pattern (Dry-Run):** The agent generates a structured proposal (`ActionProposalSchema`) displaying the target issue, affected fields, and deletion reason.
-  * **Mandatory Human Approval (HITL):** Execution requires explicit human confirmation via an authenticated webhook, Telegram confirmation button, or CLI prompt with an ephemeral HMAC approval token.
+  * **Staging / Proposal Pattern (Dry-Run):** The agent calls `request_restricted_operation`; the Tier Router returns a proposal `{status: PENDING_HUMAN_APPROVAL, operation, arguments}` and executes nothing.
+  * **Mandatory Human Approval (HITL):** A human reviews the proposal and runs the operation in Jira. An in-chat approval channel (e.g. a Slack button with a short-lived signed token) is a planned extension.
 
 ---
 
@@ -157,7 +157,8 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
 * **Agent Governance & Architectural Controls:**
   * **Hard Blacklist (Never Exposed as MCP Tools):** Tier 4 endpoints are completely excluded from the agent gateway.
   * **Deterministic Refusal & Escalation:** When a user prompts the agent to perform a Tier 4 task (e.g., *"Delete the KAN project"*), the agent returns a deterministic response:
-    > *"This action requires Organization Administrator privileges and is blocked for autonomous AI agents under enterprise Least Privilege policy. Please perform this operation directly in the Atlassian Admin Console: https://admin.atlassian.com"*
+    > *"Tenant administration is forbidden for agents. Escalate to an admin: https://admin.atlassian.com"*
+  * **Deny by Default:** An operation that is not in the router's registry is treated as Tier 4.
 
 ---
 
@@ -170,7 +171,7 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
 | **ADK Tool Choice Mode** | `Mode.AUTO` / `Mode.ANY` | `Mode.AUTO` (Guarded) | Proposal Only (`Mode.NONE` for mutation) | Out of Scope / Refusal |
 | **Pydantic Shield** | Field Projection & Fallback | Two-Layer Validation + Duplicate JQL | Dry-Run Proposal Contract | N/A (Excluded) |
 | **Audit Trace** | Client Metric (Latency) | In-Issue Comment with `TraceID` | Audit Trail + Human Approver ID | Security Audit Log (Atlassian) |
-| **FastMCP Status** | Bundled (`search_jira_issues`, `createmeta`) | Bundled (`create_jira_issue`, `move_status`, `link`) | Staging Proposal Tool Only | **Never Exposed** |
+| **FastMCP Status** | Bundled (`search_jira_issues`, `check_duplicate_issues`, `get_required_fields_meta`) | Bundled (`create_jira_issue`, `move_jira_issue_status`, `link_jira_issues`) | `request_restricted_operation` (proposal only) | **Never Exposed** (refusal via `request_restricted_operation`) |
 
 ---
 
@@ -182,19 +183,36 @@ To solve this, this repository establishes a **4-Tier Operational Risk Hierarchy
 User Prompt: "Create a bug ticket: Payment gateway timeout on checkout"
                      │
                      ▼
-[ TIER 1 QUERY ] ──▶ search_jira_issues(jql='text ~ "Payment gateway timeout"')
+[ TIER 2 TOOL ] ──▶ create_jira_issue(summary="Payment gateway timeout on checkout", issue_type="Bug")
                      │
-                     ├─▶ Duplicate Found? ──▶ Attach comment to existing ticket (Tier 2) & STOP.
-                     │
-                     ▼ (No Duplicate)
-[ TIER 1 QUERY ] ──▶ get_required_fields_meta(project_key='KAN', issue_type='Bug')
+                     ├─▶ Tier Router: create_jira_issue = T2 → allowed with pre-flight
+                     ├─▶ Layer 1: key regex, single-line summary, size limits (no network on failure)
+                     ├─▶ Pre-flight triage (inside the tool): summary ~ all terms, then any term
+                     │      ├─▶ Duplicate (≥ 0.75)  ──▶ ok=false + "link or comment KAN-xx" & STOP
+                     │      └─▶ Triage unavailable  ──▶ ok=false (fail-closed) & STOP
+                     ▼ (No duplicate)
+[ TIER 2 WRITE ] ──▶ POST /rest/api/3/issue   (on HTTP 400 → hint lists required fields)
                      │
                      ▼
-[ TIER 2 WRITE ] ──▶ create_jira_issue(summary, description, project_key='KAN')
-                     │
-                     ▼
-[ OBSERVABILITY ] ──▶ Log TraceID to local log + inject audit comment to Jira ticket.
+[ OBSERVABILITY ] ──▶ One trace_id per HTTP call in the JSON Lines log; ServiceResult carries the trace_id.
 ```
+
+---
+
+## ✅ Implementation Status (what is enforced in code)
+
+| Control | Where | Tested in |
+|---|---|---|
+| Tier Router T1–T4, deny by default | `shields/tier_router.py` | `tests/test_mcp_tools.py::test_tier_router` |
+| Layer 1 argument guard, no network on failure | `shields/tool_inputs.py`, `mcp_server/jira_mcp.py::_run` | `test_layer1_rejects_*` |
+| Duplicate triage inside `create_jira_issue`, fail-closed | `mcp_server/jira_mcp.py`, `client/jira_client.py::find_similar_issues` | `test_create_blocks_duplicate_*`, `test_create_is_blocked_when_triage_is_unavailable`, `test_triage_*` |
+| `ServiceResult` envelope, tools never raise | `shields/jira_shield.py`, `mcp_server/jira_mcp.py::_run` | `test_tools_never_raise_on_missing_credentials` |
+| Staged proposal (T3) and refusal (T4) | `request_restricted_operation` | `test_restricted_operation_*` |
+| Current createmeta endpoints + 10-min cache, required-field hint on 400 | `client/jira_client.py` | `test_createmeta_*`, `test_create_issue_400_hint_*` |
+| One trace per HTTP call, failed audit comment reported | `client/jira_client.py::_request`, `add_audit_comment` | `test_http_error_*`, `test_network_error_*`, `test_audit_comment_*` |
+| GET-only retries honouring `Retry-After`, HTTPS only | `client/jira_client.py` | `test_https_is_required` |
+
+**Planned, not implemented:** caching `field` / `priority`, an in-chat approval channel for Tier 3, per-user OAuth tokens (the client uses one API token).
 
 ---
 
