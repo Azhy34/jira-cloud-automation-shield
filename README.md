@@ -73,16 +73,17 @@ The integration was structured into a master Epic and atomic child phases direct
 ```text
 [ MASTER EPIC: KAN-1 ]
 "[INT-CORE] Jira Cloud REST API v3 Integration & Automated Contract Discovery" [DONE]
-  ├── [KAN-10] [INT-100] Step 0: Atlassian Jira Fundamentals Certification       [DONE]
-  ├── [KAN-2]  [INT-101] Security & Identity Setup (Zero-Leak Credentials Vault)  [DONE]
-  ├── [KAN-3]  [INT-102] Postman MCP Workspace & Environment Orchestration       [DONE]
-  ├── [KAN-4]  [INT-103] API Probing & Breaking Changes Detection (/search/jql)    [DONE]
-  ├── [KAN-9]  [INT-106] Structured Runtime Observability & In-Issue Audit Tracing [DONE]
-  ├── [KAN-5]  [INT-104] Mutation Testing: End-to-End Issue Lifecycle Creation    [DONE]
-  ├── [KAN-6]  [INT-105] Machine-Readable Audit Report & Handoff                 [DONE]
-  ├── [KAN-11] [INT-107] Public GitHub Repository, FastMCP Package & CI Pipeline  [DONE]
-  ├── [KAN-7]  [AI-101]  Slack Bot Gateway & Ingestion Service                   [DONE]
-  └── [KAN-8]  [AI-102]  Data Connectors & Enterprise RAG Pipeline               [DONE]
+  ├── [KAN-10] [INT-100] Step 0: Atlassian Jira Fundamentals Certification          [DONE]
+  ├── [KAN-2]  [INT-101] Step 1: Security & Identity Setup (Zero-Leak Vault)        [DONE]
+  ├── [KAN-3]  [INT-102] Step 2: Postman MCP Workspace & Environment Orchestration  [DONE]
+  ├── [KAN-4]  [INT-103] Step 3: API Probing & Breaking Changes Detection (/search) [DONE]
+  ├── [KAN-5]  [INT-104] Step 4: Mutation Testing: End-to-End Issue Lifecycle       [DONE]
+  ├── [KAN-6]  [INT-105] Step 5: Machine-Readable Audit Report & Contract Handoff    [DONE]
+  ├── [KAN-12] [INT-106] Step 6: Two-Layer Pydantic Error Shield & FastMCP Gateway   [DONE]
+  ├── [KAN-9]  [INT-107] Step 7: Structured Runtime Observability & In-Issue Tracing [DONE]
+  ├── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline [DONE]
+  ├── [KAN-7]  [AI-101]  Step 9: Slack Bot Gateway & Ingestion Service              [DONE]
+  └── [KAN-8]  [AI-102]  Step 10: Data Connectors & Enterprise RAG Pipeline          [DONE]
 ```
 
 > 💡 **Step 0 Prerequisite (`KAN-10`):** Completed official Atlassian Learning Path [Get the Most Out of Jira](https://community.atlassian.com/learning/path/get-the-most-out-of-jira) prior to building custom automation, ensuring deep domain understanding of Jira issue types, Kanban workflows, timeline views, and JQL syntax before diving into REST API development.
