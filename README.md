@@ -49,6 +49,23 @@ Production-grade integration gateway, Model Context Protocol (MCP) server, autom
 
 ---
 
+## 📂 Repository Layout & Component Architecture
+
+```text
+jira-cloud-automation-shield/
+├── client/              # Resilient Jira Cloud v3 client, modern JQL & ADF engine
+├── controller/          # Interactive IDE Kanban board CLI controller
+├── discovery/           # Automated API contract discovery reports (10 verified operations)
+├── docs/                # Enterprise 4-Tier Operational Risk Taxonomy & compliance specs
+├── logs/                # Audit telemetry verification guide and sample traces
+├── mcp_server/          # FastMCP server exposing 7 atomic agent tools & Tier Router
+├── shields/             # Two-Layer Pydantic error shield & JiraTracer observability
+├── skills/              # Production Agent Skills (jira-triage-guard, jira-spec-to-backlog)
+└── tests/               # 40 automated unit, contract, and live-simulation tests
+```
+
+---
+
 ## 🔍 Key Engineering Highlights & Breaking Change Discovery
 
 During automated endpoint probing, this project proactively identified and mitigated a critical Atlassian breaking change:
