@@ -55,6 +55,7 @@ During automated endpoint probing, this project proactively identified and mitig
 * ⚠️ **Legacy Endpoint:** `GET /rest/api/3/search` was deprecated by Atlassian and returned **HTTP 410 Gone** (`CHANGE-2046`).
 * 🛡️ **Seamless Migration:** The client immediately migrated to **`GET /rest/api/3/search/jql`** with explicit field projection masks (`fields: summary,status,issuetype,parent,description,resolution`) and `nextPageToken` pagination, ensuring zero production downtime.
 * 🔁 **Second deprecated endpoint (Step 11):** the same discovery discipline, applied to Atlassian's OpenAPI spec, showed that `GET /rest/api/3/issue/createmeta` is marked `deprecated`. Required-field introspection now uses `/issue/createmeta/{project}/issuetypes` and `/issuetypes/{issueTypeId}`.
+* 📦 **MCP SDK 2.x breaking change (Step 11):** an unpinned `mcp>=1.0.0` let a clean install pull MCP SDK 2.x, which removed `mcp.server.fastmcp` (FastMCP was renamed to `MCPServer`), so the server could not start. The new tool tests caught it in CI; the dependency is pinned to `mcp<2` until the migration.
 * 🐞 **Triage miss caught by a live smoke test (Step 11):** Jira text search needs every word to match, and it indexes `[INT-103]` as one token — so an exact duplicate of `KAN-4` was not found. Triage now drops ticket prefixes and digit tokens, searches all terms first and any term as a fallback, then ranks by similarity.
 
 ### SLA & Latency Benchmark Results

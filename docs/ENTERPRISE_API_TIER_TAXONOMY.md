@@ -212,7 +212,7 @@ User Prompt: "Create a bug ticket: Payment gateway timeout on checkout"
 | One trace per HTTP call, failed audit comment reported | `client/jira_client.py::_request`, `add_audit_comment` | `test_http_error_*`, `test_network_error_*`, `test_audit_comment_*` |
 | GET-only retries honouring `Retry-After`, HTTPS only | `client/jira_client.py` | `test_https_is_required` |
 
-**Planned, not implemented:** caching `field` / `priority`, an in-chat approval channel for Tier 3, per-user OAuth tokens (the client uses one API token).
+**Planned, not implemented:** caching `field` / `priority`, an in-chat approval channel for Tier 3, per-user OAuth tokens (the client uses one API token), migration to MCP SDK 2.x (`MCPServer`; pinned to `mcp<2` for now).
 
 ---
 
