@@ -1,4 +1,8 @@
-# Dependencies for Jira Cloud Automation & Two-Layer Shield
+# Production Dependencies
 requests>=2.31.0
 pydantic>=2.5.0
 python-dotenv>=1.0.0
+mcp>=1.0.0
+
+# Testing
+pytest>=8.0.0

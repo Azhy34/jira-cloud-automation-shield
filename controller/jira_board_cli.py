@@ -37,14 +37,13 @@ def display_board(project_key: str):
 
         line = f"[{key}] ({itype}) {summary}{parent}"
 
-        matched = False
-        for col in columns:
-            if col.lower() in status.lower() or ("к выполнению" in status.lower() and col == "To Do") or ("в работе" in status.lower() and col == "In Progress") or ("готово" in status.lower() and col == "Done"):
-                columns[col].append(line)
-                matched = True
-                break
-        if not matched:
-            columns.setdefault(status, []).append(line)
+        category_key = (issue.fields.status.statusCategory.key or "").lower() if issue.fields.status.statusCategory else ""
+        if category_key == "done":
+            columns["Done"].append(line)
+        elif category_key == "indeterminate":
+            columns["In Progress"].append(line)
+        else:
+            columns["To Do"].append(line)
 
     print(f"\n=================================================================")
     print(f"📊 LIVE JIRA KANBAN BOARD CONTROLLER (Project: {project_key})")

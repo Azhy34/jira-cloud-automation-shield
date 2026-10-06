@@ -6,9 +6,14 @@ Provides zero-leak data modeling, contract validation, and fallback mechanisms.
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
+class JiraStatusCategory(BaseModel):
+    key: Optional[str] = None
+    name: Optional[str] = None
+
 class JiraStatus(BaseModel):
-    name: str = Field(..., description="Status name, e.g. To Do, In Progress, Done")
+    name: str = Field(..., description="Status display name")
     id: Optional[str] = None
+    statusCategory: Optional[JiraStatusCategory] = None
 
 class JiraIssueType(BaseModel):
     name: str = Field(..., description="Issue type name, e.g. Epic, Task, Story, Bug")

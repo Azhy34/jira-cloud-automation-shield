@@ -1,39 +1,57 @@
 # 🛡️ Jira Cloud REST API v3 Integration & Two-Layer Shield
 
+[![CI - Tests](https://github.com/Azhy34/jira-cloud-automation-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Azhy34/jira-cloud-automation-shield/actions)
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2.5-brightgreen.svg)](https://docs.pydantic.dev/)
+[![FastMCP](https://img.shields.io/badge/Model%20Context%20Protocol-FastMCP%20Server-8A2BE2.svg)](https://modelcontextprotocol.io/)
 [![Jira API](https://img.shields.io/badge/Atlassian-Jira%20Cloud%20REST%20v3-0052CC.svg)](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/)
-[![Postman MCP](https://img.shields.io/badge/Postman-MCP%20Orchestrated-FF6C37.svg)](https://www.postman.com/)
 [![Security](https://img.shields.io/badge/Security-Zero--Leak%20Vault-red.svg)](#security--zero-leak-guarantees)
 
-Production-grade integration gateway, automated contract discovery suite, and interactive IDE Kanban controller for **Atlassian Jira Cloud REST API v3**, architected for autonomous AI agents and enterprise engineering teams.
+Production-grade integration gateway, Model Context Protocol (MCP) server, automated contract discovery suite, and interactive IDE Kanban controller for **Atlassian Jira Cloud REST API v3**, architected for autonomous AI agents and enterprise engineering teams.
 
 ---
 
 ## 🏛️ System Architecture
 
 ```text
-[ Developer / AI Agent in IDE ]
-           │
-           ├── 1. Proactive Contract Discovery & Probing (Postman MCP)
-           ▼
-[ Two-Layer Pydantic Error Shield (`shields/jira_shield.py`) ]
-           │  ├── Strict Schema Validation (JiraIssue, JiraSearchResponse)
-           │  └── Resilient Error Fallback (Zero Hallucination)
-           ▼
-[ Resilient Jira Cloud Client (`client/jira_client.py`) ]
-           │  ├── Modern `/rest/api/3/search/jql` Protocol
-           │  ├── Atlassian Document Format (ADF) Payload Engine
-           │  └── Board Transition Controller (To Do ➔ In Progress ➔ Done)
-           ▼
-[ Atlassian Jira Cloud Platform (`https://*.atlassian.net`) ]
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Autonomous AI Agent                             │
+│                 (Google ADK / Claude / Cursor / IDE)                   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Model Context Protocol (FastMCP)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│              FastMCP Gateway (`mcp_server/jira_mcp.py`)                │
+│    • search_jira_issues    • create_jira_issue    • move_jira_issue    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│           Two-Layer Pydantic Error Shield (`shields/jira_shield.py`)   │
+│    • Strict Contract Validation        • Normalized statusCategory     │
+│    • Resilient Error Fallback          • Zero Hallucination Guarantee  │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│              Resilient Jira Client (`client/jira_client.py`)           │
+│    • Modern `/rest/api/3/search/jql` Protocol (Zero 410 Errors)        │
+│    • Atlassian Document Format (ADF) Payload Engine                    │
+│    • Basic Auth Header Scrubber (Zero-Leak Memory Vault)               │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ HTTPS (TLS 1.3)
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                 Atlassian Jira Cloud Platform                          │
+│               (`https://*.atlassian.net`)                              │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## 🔍 Key Engineering Highlights & Breaking Change Discovery
 
-During automated endpoint probing, this project proactively identified and mitigated a major Atlassian breaking change:
+During automated endpoint probing, this project proactively identified and mitigated a critical Atlassian breaking change:
 * ⚠️ **Legacy Endpoint:** `GET /rest/api/3/search` was deprecated by Atlassian and returned **HTTP 410 Gone** (`CHANGE-2046`).
 * 🛡️ **Seamless Migration:** The client immediately migrated to **`GET /rest/api/3/search/jql`** with explicit field projection masks (`fields: summary,status,issuetype,parent`), ensuring zero production downtime.
 
@@ -66,6 +84,21 @@ The integration was structured into a master Epic and atomic child phases direct
 
 ---
 
+## 🤖 Model Context Protocol (FastMCP) for AI Agents
+
+Run the bundled FastMCP server to grant autonomous AI agents tool access to your Jira board:
+
+```bash
+python mcp_server/jira_mcp.py
+```
+
+### Registered Agent Tools:
+1. `search_jira_issues(jql, max_results)` — Query board state via JQL.
+2. `create_jira_issue(summary, description, project_key, issue_type, parent_key)` — Create work items with rich text ADF descriptions.
+3. `move_jira_issue_status(issue_key, target_status)` — Transition issues across Kanban columns (*To Do*, *In Progress*, *Done*).
+
+---
+
 ## 🚀 Quickstart & Interactive IDE Controller
 
 ### 1. Prerequisites & Installation
@@ -81,31 +114,17 @@ cp .env.example .env
 # Edit .env with your JIRA_URL, JIRA_EMAIL, JIRA_API_TOKEN, and JIRA_PROJECT_KEY
 ```
 
-### 3. Inspect Live Board from Terminal
+### 3. Run Automated Tests
+```bash
+pytest tests/ -v
+```
+
+### 4. Inspect Live Board from Terminal
 ```bash
 python controller/jira_board_cli.py
 ```
-*Output:*
-```text
-=================================================================
-📊 LIVE JIRA KANBAN BOARD CONTROLLER (Project: KAN)
-=================================================================
 
-📌 COLUMN: [TO DO] (5 items)
-   • [KAN-1] (Эпик) [INT-CORE] Jira Cloud REST API v3 Integration...
-   • [KAN-5] (Задача) [INT-104] Mutation Testing: End-to-End Issue Lifecycle Creation
-   • [KAN-6] (Задача) [INT-105] Machine-Readable Audit Report & Handoff
-   ...
-
-📌 COLUMN: [IN PROGRESS] (1 items)
-   • [KAN-4] (Задача) [INT-103] API Probing & Breaking Changes Detection (/search/jql)
-
-📌 COLUMN: [DONE] (2 items)
-   • [KAN-2] (Задача) [INT-101] Security & Identity Setup (Zero-Leak Credentials Vault)
-   • [KAN-3] (Задача) [INT-102] Postman MCP Workspace & Environment Orchestration
-```
-
-### 4. Move Work Items Between Columns
+### 5. Move Work Items Between Columns
 ```bash
 # Move task to In Progress
 python controller/jira_board_cli.py move KAN-5 "In Progress"

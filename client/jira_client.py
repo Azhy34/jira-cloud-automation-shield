@@ -60,7 +60,7 @@ class JiraCloudClient:
         project_key: str,
         summary: str,
         description_text: str,
-        issue_type: str = "Задача",
+        issue_type: str = "Task",
         parent_key: Optional[str] = None
     ) -> JiraMutationResponse:
         """Creates an issue using standard Atlassian Document Format (ADF)."""
