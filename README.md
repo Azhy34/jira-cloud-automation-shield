@@ -146,6 +146,48 @@ To prevent autonomous AI agents from polluting backlogs, wiping compliance logs,
                          /──────────────────\Blast Radius: Zero | Access: Fully Autonomous
 ```
 
+```text
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             Autonomous AI Agent                                  │
+│                      (Google ADK / Claude / Cursor / IDE)                        │
+└────────────────────────────────────────┬─────────────────────────────────────────┘
+                                         │ 1. Invokes Clean MCP Tool
+                                         │    (e.g., create_jira_issue, search_jira_issues)
+                                         ▼
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│               FastMCP Gateway & Two-Layer Pydantic Error Shield                  │
+│                                                                                  │
+│   [ TIER ROUTER & BLAST RADIUS FIREWALL ]                                        │
+│   ├── 🟢 TIER 1: Read & Discovery   ──▶ Auto-Pass + Field Projection Mask         │
+│   ├── 🟡 TIER 2: Guarded Mutations  ──▶ Pre-Flight JQL Duplicate & Meta Checks   │
+│   ├── 🟠 TIER 3: Destructive/Bulk   ──▶ INTERCEPT: Generate Staged Proposal (HITL)│
+│   └── 🔴 TIER 4: Tenant Admin       ──▶ HARD REJECT: Deterministic Refusal Link  │
+│                                                                                  │
+│   [ LAYER 1: Inbound Parsed Arguments Guard (Pydantic v2) ]                      │
+│   • Pre-network schema validation (summary length, project key regex, ADF format)│
+│   • Immediate self-correction hint returned on schema failure without net call   │
+│                                                                                  │
+│   [ STEP 9 HARDENING GUARDS ]                                                    │
+│   • check_duplicate_issues: Pre-creation JQL similarity query (last 90 days)     │
+│   • get_createmeta_fields: Introspects required custom fields before POST         │
+│                                                                                  │
+│   [ ZERO-DEPENDENCY TRACER & AUDIT ENGINE ]                                      │
+│   • Emits correlation `trace_id` (trc-xxxx) to append-only JSON log              │
+│   • Attaches two-way audit trail comment to Jira Cloud work items                │
+│                                                                                  │
+│   [ LAYER 2: Outbound Response Shield & Compression ]                            │
+│   • Filters 35KB raw Atlassian response down to <1KB normalized Pydantic model   │
+│   • Protects agent from HTTP 4xx/5xx network crashes via ServiceResult fallback   │
+└────────────────────────────────────────┬─────────────────────────────────────────┘
+                                         │ 2. Scoured, Validated TLS 1.3 Requests
+                                         ▼
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│              Atlassian Jira Cloud REST API v3 (500+ Raw Endpoints)               │
+│         (`POST /rest/api/3/issue`, `GET /rest/api/3/search/jql`, etc.)           │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+
 | Operational Tier | Representative Endpoints | Blast Radius | Agent Autonomy & Governance |
 |---|---|---|---|
 | **🟢 Tier 1: Read & Discovery** | `GET /myself`, `GET /project`, `POST /search/jql`, `GET /createmeta`, `GET /transitions`, `GET /field` | **Zero** (Idempotent query) | **100% Autonomous (`Mode.AUTO` / `Mode.ANY`)**. Enforces projection masks (`fields: ...`) and client-side metadata caching. |
