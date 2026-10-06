@@ -146,6 +146,37 @@ python controller/jira_board_cli.py move KAN-5 "In Progress"
 python controller/jira_board_cli.py move KAN-4 "Done"
 ```
 
+## 📈 Structured Observability & Audit Tracing
+
+Every transaction across the client, CLI controller, and FastMCP server is automatically instrumented with zero-dependency structured JSON tracing via `shields/tracer.py`.
+
+### 1. Real-Time Trace Log Sample (`logs/jira_trace.log`)
+Each outbound API call writes an atomic, append-only JSON event:
+
+```json
+{
+  "timestamp": "2026-10-06T10:04:33Z",
+  "trace_id": "trc-c68108e2",
+  "operation": "move_status",
+  "endpoint": "/rest/api/3/issue/KAN-4/transitions",
+  "status_code": 204,
+  "latency_ms": 1482.4,
+  "resource_key": "KAN-4",
+  "success": true,
+  "error": null
+}
+```
+
+### 2. In-Issue Two-Way Audit Trail (Jira Cloud UI)
+When issues transition across columns or mutate, an automated audit trail comment is attached directly to the Jira work item:
+
+> `🤖 [AI Audit] Transitioned to 'Done' via IDE Controller. Trace ID: trc-c68108e2`
+
+### 3. Key Observability Benefits:
+* **Correlation:** The `trace_id` links customer Slack conversations, agent tool calls, and Atlassian audit records.
+* **SLA Monitoring:** Exact millisecond latency (`latency_ms`) detects upstream Atlassian performance degradation.
+* **SIEM / Datadog Ready:** Structured JSON Lines format easily streams to Cloud Logging, Grafana Loki, or Datadog.
+
 ---
 
 ## 🔒 Security & Zero-Leak Guarantees
