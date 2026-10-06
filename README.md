@@ -75,7 +75,8 @@ The integration was structured into a master Epic and atomic child phases direct
 "[INT-CORE] Jira Cloud REST API v3 Integration & Automated Contract Discovery"
   ├── [KAN-2] [INT-101] Security & Identity Setup (Zero-Leak Credentials Vault)  [DONE]
   ├── [KAN-3] [INT-102] Postman MCP Workspace & Environment Orchestration       [DONE]
-  ├── [KAN-4] [INT-103] API Probing & Breaking Changes Detection (/search/jql)    [IN PROGRESS]
+  ├── [KAN-4] [INT-103] API Probing & Breaking Changes Detection (/search/jql)    [DONE]
+  ├── [KAN-9] [INT-106] Structured Runtime Observability & In-Issue Audit Tracing [DONE]
   ├── [KAN-5] [INT-104] Mutation Testing: End-to-End Issue Lifecycle Creation    [TO DO]
   ├── [KAN-6] [INT-105] Machine-Readable Audit Report & Handoff                 [TO DO]
   ├── [KAN-7] [AI-101]  Slack Bot Gateway & Ingestion Service                   [TO DO]
