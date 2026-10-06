@@ -23,12 +23,16 @@ class JiraParentRef(BaseModel):
     key: str = Field(..., description="Parent issue key, e.g. KAN-1")
     id: Optional[str] = None
 
+class JiraResolution(BaseModel):
+    name: str = Field(..., description="Resolution name, e.g. Done, Fixed, Won't Do")
+
 class JiraIssueFields(BaseModel):
     summary: str
     status: JiraStatus
     issuetype: JiraIssueType
     parent: Optional[JiraParentRef] = None
     description: Optional[Dict[str, Any]] = None
+    resolution: Optional[JiraResolution] = None
 
 class JiraIssue(BaseModel):
     id: str
@@ -39,6 +43,14 @@ class JiraSearchResponse(BaseModel):
     total: Optional[int] = None
     maxResults: Optional[int] = None
     issues: List[JiraIssue] = Field(default_factory=list)
+    nextPageToken: Optional[str] = None
+    isLast: Optional[bool] = None
+
+class JiraComment(BaseModel):
+    id: str
+    author: Optional[str] = None
+    created: Optional[str] = None
+    text: str = ""
 
 class JiraMutationResponse(BaseModel):
     id: str
@@ -62,7 +74,11 @@ class JiraDuplicateCheckResult(BaseModel):
     is_duplicate: bool
     query: str
     matches: List[JiraDuplicateMatch] = Field(default_factory=list)
-    recommendation: str = Field(..., description="Actionable advice: CREATE_NEW, LINK_DUPLICATE, or COMMENT_EXISTING")
+    recommendation: str = Field(
+        ...,
+        description="Actionable advice: CREATE_NEW, INVESTIGATE_SIMILAR, LINK_DUPLICATE, or TRIAGE_UNAVAILABLE"
+    )
+    error: Optional[str] = Field(None, description="Set when the triage search itself failed (fail-closed)")
 
 class JiraCreateMetaField(BaseModel):
     field_id: str
@@ -81,4 +97,13 @@ class JiraIssueLinkResponse(BaseModel):
     inward_key: str
     outward_key: str
     link_type: str
+
+# Layer 2: one result envelope for every agent tool — tools never raise to the agent
+class ServiceResult(BaseModel):
+    ok: bool
+    tier: Optional[str] = None
+    data: Optional[Any] = None
+    error: Optional[JiraErrorResponse] = None
+    hint: Optional[str] = Field(None, description="Self-correction advice for the calling agent")
+    trace_id: Optional[str] = None
 

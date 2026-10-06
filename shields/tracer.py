@@ -3,6 +3,7 @@ Zero-Dependency Structured Tracer & Observability Logger for Jira Operations.
 Provides unique trace_ids, SLA latency timing, and zero-leak structured JSON output.
 """
 
+import os
 import time
 import uuid
 import json
@@ -10,13 +11,14 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-# Ensure logs directory exists
-log_dir = Path("logs")
-log_dir.mkdir(exist_ok=True)
+# Log next to the package (or JIRA_TRACE_LOG_DIR), not in whatever directory the process started from
+log_dir = Path(os.getenv("JIRA_TRACE_LOG_DIR") or Path(__file__).resolve().parent.parent / "logs")
+log_dir.mkdir(parents=True, exist_ok=True)
 trace_log_file = log_dir / "jira_trace.log"
 
 logger = logging.getLogger("jira_tracer")
 logger.setLevel(logging.INFO)
+logger.propagate = False  # traces go only to their JSON Lines file, never to the app console or MCP stdio
 
 if not logger.handlers:
     file_handler = logging.FileHandler(trace_log_file, encoding="utf-8")
