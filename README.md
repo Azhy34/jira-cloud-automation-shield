@@ -75,7 +75,7 @@ The integration was structured into a master Epic and atomic child phases direct
 "[INT-CORE] Jira Cloud REST API v3 Integration & Automated Contract Discovery" [DONE]
   ├── [KAN-10] [INT-100] Step 0: Atlassian Jira Fundamentals Certification          [DONE]
   ├── [KAN-2]  [INT-101] Step 1: Security & Identity Setup (Zero-Leak Vault)        [DONE]
-  ├── [KAN-3]  [INT-102] Step 2: Postman MCP Workspace & Environment Orchestration  [DONE]
+  ├── [KAN-3]  [INT-102] Step 2: Postman MCP & Jira Endpoints Discovery              [DONE]
   ├── [KAN-4]  [INT-103] Step 3: API Probing & Breaking Changes Detection (/search) [DONE]
   ├── [KAN-5]  [INT-104] Step 4: Mutation Testing: End-to-End Issue Lifecycle       [DONE]
   ├── [KAN-6]  [INT-105] Step 5: Machine-Readable Audit Report & Contract Handoff    [DONE]
