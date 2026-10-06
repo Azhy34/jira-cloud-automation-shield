@@ -1,0 +1,43 @@
+[
+  {
+    "name": "1. Verify Auth (GET /rest/api/3/myself)",
+    "method": "GET",
+    "url": "https://mykhail-azhyshchev.atlassian.net/rest/api/3/myself",
+    "status_code": 200,
+    "latency_ms": 455.56,
+    "success": true
+  },
+  {
+    "name": "2. List Projects (GET /rest/api/3/project)",
+    "method": "GET",
+    "url": "https://mykhail-azhyshchev.atlassian.net/rest/api/3/project",
+    "status_code": 200,
+    "latency_ms": 347.41,
+    "success": true
+  },
+  {
+    "name": "3. Project Schema (GET /rest/api/3/project/KAN)",
+    "method": "GET",
+    "url": "https://mykhail-azhyshchev.atlassian.net/rest/api/3/project/KAN",
+    "status_code": 200,
+    "latency_ms": 387.78,
+    "success": true
+  },
+  {
+    "name": "4. Search Issues (GET /rest/api/3/search/jql)",
+    "method": "GET",
+    "url": "https://mykhail-azhyshchev.atlassian.net/rest/api/3/search/jql",
+    "status_code": 200,
+    "latency_ms": 467.58,
+    "success": true,
+    "note": "Proactively migrated from deprecated /rest/api/3/search (HTTP 410 Gone)"
+  },
+  {
+    "name": "5. Mutation Testing: Create Issue (POST /rest/api/3/issue)",
+    "method": "POST",
+    "url": "https://mykhail-azhyshchev.atlassian.net/rest/api/3/issue",
+    "status_code": 201,
+    "latency_ms": 1289.55,
+    "success": true
+  }
+]

@@ -1,0 +1,19 @@
+# Environment variables & secrets (ZERO LEAK ENFORCEMENT)
+.env
+*.env
+.env.jira
+.env.local
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
