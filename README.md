@@ -66,27 +66,14 @@ During automated endpoint probing, this project proactively identified and mitig
 
 ---
 
-## 📋 Jira Work Breakdown Structure (WBS)
+## 📐 Enterprise Architecture Principles & Design Methodology
 
-The integration was structured into a master Epic and atomic child phases directly deployed to the live **Jira Software Kanban Board (`KAN`)**:
+This integration gateway is built on four core enterprise design principles to deliver maximum resilience, zero hallucinations, and strict compliance:
 
-```text
-[ MASTER EPIC: KAN-1 ]
-"[INT-CORE] Jira Cloud REST API v3 Integration & Automated Contract Discovery" [DONE]
-  ├── [KAN-10] [INT-100] Step 0: Atlassian Jira Fundamentals Certification          [DONE]
-  ├── [KAN-2]  [INT-101] Step 1: Security & Identity Setup (Zero-Leak Vault)        [DONE]
-  ├── [KAN-3]  [INT-102] Step 2: Postman MCP & Jira Endpoints Discovery              [DONE]
-  ├── [KAN-4]  [INT-103] Step 3: API Probing & Breaking Changes Detection (/search) [DONE]
-  ├── [KAN-5]  [INT-104] Step 4: Mutation Testing: End-to-End Issue Lifecycle       [DONE]
-  ├── [KAN-6]  [INT-105] Step 5: Machine-Readable Audit Report & Contract Handoff    [DONE]
-  ├── [KAN-12] [INT-106] Step 6: Two-Layer Pydantic Error Shield & FastMCP Gateway   [DONE]
-  ├── [KAN-9]  [INT-107] Step 7: Structured Runtime Observability & In-Issue Tracing [DONE]
-  ├── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline    [DONE]
-  ├── [KAN-13] [INT-109] Step 9: Architectural Hardening & Official Skills Remediation [DONE]
-  └── [KAN-14] [INT-110] Step 10: Enterprise 4-Tier Operational Risk Taxonomy & Matrix [DONE]
-```
-
-> 💡 **Step 0 Prerequisite (`KAN-10`):** Completed official Atlassian Learning Path [Get the Most Out of Jira](https://community.atlassian.com/learning/path/get-the-most-out-of-jira) prior to building custom automation, ensuring deep domain understanding of Jira issue types, Kanban workflows, timeline views, and JQL syntax before diving into REST API development.
+1. **Principle of Least Privilege (PoLP):** Rather than exposing all 500+ raw Atlassian REST endpoints to LLM context, the gateway provides 6 high-leverage atomic tools backed by a 4-Tier Operational Risk Firewall.
+2. **Pre-Flight Zero-Hallucination Shields:** Every tool call passes through an inbound Pydantic validation layer and proactive pre-flight checks (duplicate detection, required custom fields introspection) before reaching the network.
+3. **97% Context Compression:** Raw 35KB Atlassian JSON responses are normalized and pruned to lean `<1KB` payloads via field projection masks, drastically reducing token consumption and reasoning latency.
+4. **Structured Auditability & Traceability:** Zero-dependency correlation tracing (`trace_id`) records every transaction in append-only JSON logs and attaches two-way audit comments to Jira work items for compliance.
 
 ---
 
