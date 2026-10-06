@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 load_dotenv(".env")
 load_dotenv(".env.jira")
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env.jira")
 
 from mcp.server.fastmcp import FastMCP
 from client.jira_client import JiraCloudClient

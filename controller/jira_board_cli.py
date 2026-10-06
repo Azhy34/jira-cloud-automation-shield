@@ -19,6 +19,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 load_dotenv(".env")
 load_dotenv(".env.jira")
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env.jira")
 
 from client.jira_client import JiraCloudClient
 

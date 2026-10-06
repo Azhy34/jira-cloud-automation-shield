@@ -1,0 +1,3 @@
+{"timestamp": "2026-10-06T10:04:01Z", "trace_id": "trc-348c64f9", "operation": "search_issues_jql", "endpoint": "/rest/api/3/search/jql", "status_code": 200, "latency_ms": 670.52, "resource_key": null, "success": true, "error": null}
+{"timestamp": "2026-10-06T10:04:15Z", "trace_id": "trc-bb8e0b37", "operation": "move_status", "endpoint": "/rest/api/3/issue/KAN-4/transitions", "status_code": 400, "latency_ms": 524.97, "resource_key": "KAN-4", "success": false, "error": "Target status 'Done' not reachable"}
+{"timestamp": "2026-10-06T10:04:33Z", "trace_id": "trc-c68108e2", "operation": "move_status", "endpoint": "/rest/api/3/issue/KAN-4/transitions", "status_code": 204, "latency_ms": 1482.4, "resource_key": "KAN-4", "success": true, "error": null}
