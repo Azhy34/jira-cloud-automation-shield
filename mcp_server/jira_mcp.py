@@ -87,5 +87,47 @@ def move_jira_issue_status(issue_key: str, target_status: str) -> str:
     client.move_status(issue_key, target_status)
     return f"Issue {issue_key} successfully transitioned to {target_status}"
 
+@mcp.tool()
+def check_duplicate_issues(summary: str, project_key: str = "KAN") -> dict:
+    """
+    Pre-creation triage tool: Checks for existing duplicate or similar Jira issues 
+    before creating a new work item (prevents duplicate tickets).
+    
+    Args:
+        summary: The prospective issue title to check
+        project_key: Project key (e.g. 'KAN')
+    """
+    client = get_client()
+    result = client.find_similar_issues(summary, project_key)
+    return result.model_dump()
+
+@mcp.tool()
+def get_required_fields_meta(project_key: str = "KAN", issue_type: str = "Task") -> dict:
+    """
+    Introspects Jira issue creation metadata (createmeta) to identify required enterprise fields 
+    and prevent 400 Bad Request schema violation errors.
+    
+    Args:
+        project_key: Project key (e.g. 'KAN')
+        issue_type: Target issue type ('Task', 'Epic', 'Bug')
+    """
+    client = get_client()
+    result = client.get_createmeta_fields(project_key, issue_type)
+    return result.model_dump()
+
+@mcp.tool()
+def link_jira_issues(inward_key: str, outward_key: str, link_type: str = "Blocks") -> str:
+    """
+    Creates a semantic dependency link between two Jira issues (e.g., Blocks, Relates, Duplicate).
+    
+    Args:
+        inward_key: Inward issue key (e.g. 'KAN-2')
+        outward_key: Outward issue key (e.g. 'KAN-3')
+        link_type: Link relationship type ('Blocks', 'Relates', 'Duplicate')
+    """
+    client = get_client()
+    res = client.link_issues(inward_key, outward_key, link_type)
+    return f"Linked {inward_key} to {outward_key} via '{link_type}' (success: {res.success})"
+
 if __name__ == "__main__":
     mcp.run()

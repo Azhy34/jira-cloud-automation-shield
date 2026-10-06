@@ -81,7 +81,8 @@ The integration was structured into a master Epic and atomic child phases direct
   ├── [KAN-6]  [INT-105] Step 5: Machine-Readable Audit Report & Contract Handoff    [DONE]
   ├── [KAN-12] [INT-106] Step 6: Two-Layer Pydantic Error Shield & FastMCP Gateway   [DONE]
   ├── [KAN-9]  [INT-107] Step 7: Structured Runtime Observability & In-Issue Tracing [DONE]
-  └── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline [DONE]
+  ├── [KAN-11] [INT-108] Step 8: Public GitHub Repository, Test Suite & CI Pipeline    [DONE]
+  └── [KAN-13] [INT-109] Step 9: Architectural Hardening & Official Skills Remediation [DONE]
 ```
 
 > 💡 **Step 0 Prerequisite (`KAN-10`):** Completed official Atlassian Learning Path [Get the Most Out of Jira](https://community.atlassian.com/learning/path/get-the-most-out-of-jira) prior to building custom automation, ensuring deep domain understanding of Jira issue types, Kanban workflows, timeline views, and JQL syntax before diving into REST API development.
@@ -100,6 +101,18 @@ python mcp_server/jira_mcp.py
 1. `search_jira_issues(jql, max_results)` — Query board state via JQL.
 2. `create_jira_issue(summary, description, project_key, issue_type, parent_key)` — Create work items with rich text ADF descriptions.
 3. `move_jira_issue_status(issue_key, target_status)` — Transition issues across Kanban columns (*To Do*, *In Progress*, *Done*).
+4. `check_duplicate_issues(summary, project_key)` — Pre-creation triage tool preventing duplicate tickets via JQL similarity matching.
+5. `get_required_fields_meta(project_key, issue_type)` — Introspects required enterprise custom fields (`createmeta`) to prevent 400 Bad Request errors.
+6. `link_jira_issues(inward_key, outward_key, link_type)` — Establishes semantic dependency links (`Blocks`, `Relates`, `Duplicate`).
+
+---
+
+## 🧠 Production Agent Skills (Atlassian Open Standard)
+
+This repository bundles ready-to-run Agent Skills (`SKILL.md`) following the official [Agent Skills](https://agent-plugins.org/) standard and Atlassian Rovo best practices:
+
+* 🛡️ **[`skills/jira-triage-guard/SKILL.md`](skills/jira-triage-guard/SKILL.md)**: Production triage workflow enforcing *Extract ➔ Search ➔ Analyze ➔ Act*. Intercepts issue creation, searches recent open/resolved tickets, and prevents duplicate backlog pollution.
+* 📋 **[`skills/jira-spec-to-backlog/SKILL.md`](skills/jira-spec-to-backlog/SKILL.md)**: Automatically transforms unstructured PRDs and specifications into structured Epics, atomic child tasks with Acceptance Criteria checklists, and dependency issueLinks.
 
 ### 🧩 Extensibility Architecture: "What If an Operation is Missing?"
 

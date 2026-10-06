@@ -49,3 +49,36 @@ class JiraErrorResponse(BaseModel):
     errorMessages: List[str] = Field(default_factory=list)
     errors: Dict[str, str] = Field(default_factory=dict)
     status_code: int = 400
+
+# Architectural Hardening Models (Atlassian Official Skills Alignment)
+class JiraDuplicateMatch(BaseModel):
+    key: str
+    summary: str
+    status: str
+    similarity_score: float = Field(..., description="Estimated match confidence 0.0 - 1.0")
+    url: Optional[str] = None
+
+class JiraDuplicateCheckResult(BaseModel):
+    is_duplicate: bool
+    query: str
+    matches: List[JiraDuplicateMatch] = Field(default_factory=list)
+    recommendation: str = Field(..., description="Actionable advice: CREATE_NEW, LINK_DUPLICATE, or COMMENT_EXISTING")
+
+class JiraCreateMetaField(BaseModel):
+    field_id: str
+    name: str
+    required: bool
+    schema_type: Optional[str] = None
+    allowed_values: Optional[List[str]] = None
+
+class JiraCreateMetaResponse(BaseModel):
+    project_key: str
+    issue_type: str
+    required_fields: List[JiraCreateMetaField] = Field(default_factory=list)
+
+class JiraIssueLinkResponse(BaseModel):
+    success: bool
+    inward_key: str
+    outward_key: str
+    link_type: str
+

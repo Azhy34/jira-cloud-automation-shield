@@ -54,3 +54,52 @@ def test_jira_error_response():
     err = JiraErrorResponse.model_validate(payload)
     assert len(err.errorMessages) == 1
     assert "field" in err.errors
+
+def test_jira_duplicate_check_result():
+    from shields.jira_shield import JiraDuplicateCheckResult, JiraDuplicateMatch
+    match = JiraDuplicateMatch(
+        key="KAN-4",
+        summary="API Probing & Breaking Changes Detection",
+        status="Done",
+        similarity_score=0.92,
+        url="https://example.atlassian.net/browse/KAN-4"
+    )
+    result = JiraDuplicateCheckResult(
+        is_duplicate=True,
+        query="API Probing Breaking Changes",
+        matches=[match],
+        recommendation="LINK_DUPLICATE"
+    )
+    assert result.is_duplicate is True
+    assert len(result.matches) == 1
+    assert result.matches[0].similarity_score == 0.92
+
+def test_jira_createmeta_response():
+    from shields.jira_shield import JiraCreateMetaResponse, JiraCreateMetaField
+    field = JiraCreateMetaField(
+        field_id="customfield_10021",
+        name="Severity",
+        required=True,
+        schema_type="string",
+        allowed_values=["Critical", "Major", "Minor"]
+    )
+    meta = JiraCreateMetaResponse(
+        project_key="KAN",
+        issue_type="Bug",
+        required_fields=[field]
+    )
+    assert meta.project_key == "KAN"
+    assert len(meta.required_fields) == 1
+    assert meta.required_fields[0].required is True
+
+def test_jira_issue_link_response():
+    from shields.jira_shield import JiraIssueLinkResponse
+    link = JiraIssueLinkResponse(
+        success=True,
+        inward_key="KAN-2",
+        outward_key="KAN-3",
+        link_type="Blocks"
+    )
+    assert link.success is True
+    assert link.link_type == "Blocks"
+
